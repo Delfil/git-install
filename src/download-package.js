@@ -3,8 +3,8 @@
 var path = require('path');
 var sh = require('shelljs');
 
-var downloadPackage = function (domain, pkgName, tag, dest) {
-  var repo = 'https://github.com/' + domain + '/' + pkgName;
+var downloadPackage = function (host, domain, pkgName, tag, dest) {
+  var repo = host + '/' + domain + '/' + pkgName;
   var gitCloneCmd = ['git clone --depth 1 --branch', tag, repo, dest].join(' ');
 
   if (!sh.test('-d', dest)) { sh.mkdir('-p', dest); }
