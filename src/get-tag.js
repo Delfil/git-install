@@ -10,8 +10,8 @@ var RE = {
   TAG_PREFIX: /^.*refs\/tags\//g
 };
 
-var tagList = function (domain, pkgName) {
-  var remote = 'https://github.com/' + domain + '/' + pkgName + '.git';
+var tagList = function (host, domain, pkgName) {
+  var remote = host + '/' + domain + '/' + pkgName + '.git';
   if (cache[remote]) { return cache[remote]; }
 
   var cmd = sh.exec('git ls-remote -t ' + remote, { silent: true });
@@ -25,8 +25,8 @@ var tagList = function (domain, pkgName) {
   return tags;
 };
 
-var getTag = function (domain, pkgName, versionRange) {
-  var tags = tagList(domain, pkgName);
+var getTag = function (host, domain, pkgName, versionRange) {
+  var tags = tagList(host, domain, pkgName);
   if (!tags.length) { return; }
 
   var tagsInRange =  tags.filter(function (tag) {

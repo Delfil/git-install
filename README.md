@@ -19,9 +19,11 @@ project's `package.json`
 ```json
 {
   "gitDependencies": {
-    "jrburke/requirejs": "2.1.*",
-    "jquery/jquery": "^2.1.3",
-    "jashkenas/underscore": "*"
+    "https://github.com":{
+      "jrburke/requirejs": "2.1.*",
+      "jquery/jquery": "^2.1.3",
+      "jashkenas/underscore": "*"
+    }
   }
 }
 ```

@@ -25,12 +25,12 @@ sh.mkdir(DEST_DIR);
 var gitInstall = function (config, indent) {
   indent = indent || '';
 
-  each(config[PKG_CONFIG_ENTRY], function (item, index) {
+  each(config[PKG_CONFIG_ENTRY], function (_, host) {
+  each(config[PKG_CONFIG_ENTRY][host], function (versionRange, index) {
     var tokens = index.split('/');
     var domain = tokens[0];
     var pkgName = tokens[1];
-    var versionRange = item;
-    var tag = getTag(domain, pkgName, versionRange);
+    var tag = getTag(host, domain, pkgName, versionRange);
     var pkgLog = indent + domain + '/' + pkgName + '@' + versionRange + ': ';
 
     if (!tag) {
@@ -49,7 +49,7 @@ var gitInstall = function (config, indent) {
     sh.cd(CACHE_DIR);
 
     if (!sh.test('-d', cacheDest)) {
-      if (!downloadPackage(domain, pkgName, tag, cacheDest)) {
+      if (!downloadPackage(host, domain, pkgName, tag, cacheDest)) {
         console.error('err: downloading pkgName');
         return;
       }
@@ -61,6 +61,7 @@ var gitInstall = function (config, indent) {
       config = JSON.parse(sh.cat(childConfigFile));
       if (config) { gitInstall(config, indent + '  '); }
     }
+  });
   });
 };
 
