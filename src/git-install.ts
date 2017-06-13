@@ -5,7 +5,6 @@ import {clean} from "semver";
 import {cat, cd, mkdir, pwd, rm, test} from "shelljs";
 import {getTag} from "./get-tag";
 import {downloadPackage} from "./download-package";
-import {copyCachedPackage} from "./copy-cached-package";
 
 let os = require('osenv');
 
@@ -53,13 +52,13 @@ export function gitInstall(config: any, indent: string = '') {
       cd(CACHE_DIR);
 
       if (!test('-d', cacheDest)) {
-        if (!downloadPackage(host, domain, pkgName, tag, cacheDest)) {
+        if (!downloadPackage(host, domain, pkgName, tag, pkgDest)) {
           console.error('err: downloading pkgName');
           return;
         }
       }
 
-      copyCachedPackage(pkgName, version, cacheDest, pkgDest);
+      // copyCachedPackage(pkgName, version, cacheDest, pkgDest);
 
       if (test('-f', childConfigFile)) {
         config = JSON.parse(cat(childConfigFile));

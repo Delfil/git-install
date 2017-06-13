@@ -18,6 +18,5 @@ export function downloadPackage(host: string, domain: string, pkgName: string, t
     return false;
   }
 
-  rm('-rf', Path.join(dest, '.git'));
   return true;
 }
