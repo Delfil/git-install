@@ -1,23 +1,23 @@
 'use strict';
 
-var path = require('path');
-var sh = require('shelljs');
+import {exec, ExecOutputReturnValue, mkdir, rm, test} from "shelljs";
+import * as Path from "path";
 
-var downloadPackage = function (host, domain, pkgName, tag, dest) {
-  var repo = host + '/' + domain + '/' + pkgName;
-  var gitCloneCmd = ['git clone --depth 1 --branch', tag, repo, dest].join(' ');
+export function downloadPackage(host: string, domain: string, pkgName: string, tag: string, dest: string): boolean {
+  let repo = host + '/' + domain + '/' + pkgName;
+  let gitCloneCmd = ['git clone --depth 1 --branch', tag, repo, dest].join(' ');
 
-  if (!sh.test('-d', dest)) { sh.mkdir('-p', dest); }
+  if (!test('-d', dest)) {
+    mkdir('-p', dest);
+  }
 
-  var gitClone = sh.exec(gitCloneCmd, { silent: true });
+  let gitClone: ExecOutputReturnValue = <ExecOutputReturnValue>exec(gitCloneCmd, {silent: true});
 
   if (gitClone.code !== 0) {
-    sh.rm('-r', dest);
+    rm('-r', dest);
     return false;
   }
 
-  sh.rm('-rf', path.join(dest, '.git'));
+  rm('-rf', Path.join(dest, '.git'));
   return true;
-};
-
-module.exports = downloadPackage;
+}

@@ -1,43 +1,49 @@
 'use strict';
 
-var semver = require('semver');
-var sh = require('shelljs');
+import {clean, compare, satisfies} from "semver";
+import {exec, ExecOutputReturnValue} from "shelljs";
+import {ChildProcess} from "child_process";
 
-var cache = {};
+let cache: any = {};
 
-var RE = {
+const RE = {
   LINES: /\n/g,
   TAG_PREFIX: /^.*refs\/tags\//g
 };
 
-var tagList = function (host, domain, pkgName) {
-  var remote = host + '/' + domain + '/' + pkgName + '.git';
-  if (cache[remote]) { return cache[remote]; }
+/**
+ * Get all available tags of the given repository
+ */
+export function tagList(host: string, domain: string, pkgName: string): string[] {
+  let remote: string = host + '/' + domain + '/' + pkgName + '.git';
+  if (cache[remote]) {
+    return cache[remote];
+  }
 
-  var cmd = sh.exec('git ls-remote -t ' + remote, { silent: true });
-  var output = cmd.stdout.split(RE.LINES).slice(0, -1);
+  let cmd: ExecOutputReturnValue | ChildProcess = exec('git ls-remote -t ' + remote, {silent: true});
+  let output: string[] = cmd.stdout.toString().split(RE.LINES).slice(0, -1);
 
-  var tags = output.map(function (line) {
+  let tags: string[] = output.map(function (line) {
     return line.replace(RE.TAG_PREFIX, '');
   });
 
   cache[remote] = tags;
   return tags;
-};
+}
 
-var getTag = function (host, domain, pkgName, versionRange) {
-  var tags = tagList(host, domain, pkgName);
-  if (!tags.length) { return; }
+/**
+ * Get the latest version tag which falls in the version range
+ */
+export function getTag(host: string, domain: string, pkgName: string, versionRange: string): string {
+  let tags: string[] = tagList(host, domain, pkgName);
 
-  var tagsInRange =  tags.filter(function (tag) {
-    return semver.satisfies(semver.clean(tag), versionRange);
+  let tagsInRange: string[] = tags.filter(function (tag) {
+    return satisfies(clean(tag), versionRange);
   });
 
-  var compareTags = function (a, b) {
-    return semver.compare(semver.clean(a), semver.clean(b));
+  let compareTags = function (a: string, b: string) {
+    return compare(clean(a), clean(b));
   };
 
-  return tagsInRange.sort(compareTags).pop();
-};
-
-module.exports = getTag;
+  return <string>tagsInRange.sort(compareTags).pop();
+}

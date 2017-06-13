@@ -16,8 +16,14 @@
     "git-install": "src/cli.js"
   },
   "dependencies": {
+    "@types/semver": "^5.3.31",
+    "@types/shelljs": "^0.7.2",
     "osenv": "*",
     "semver": "*",
-    "shelljs": "*"
+    "shelljs": "*",
+    "typescript": "^2.3.4"
+  },
+  "scripts": {
+    "build": "tsc -p ./src"
   }
 }
