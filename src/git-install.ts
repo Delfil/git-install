@@ -1,8 +1,6 @@
 #!/usr/bin/env node
-'use strict';
 import * as Path from "path";
-import {clean} from "semver";
-import {cat, cd, mkdir, pwd, rm, test} from "shelljs";
+import {cat, mkdir, pwd, test} from "shelljs";
 import {getTag} from "./get-tag";
 import {downloadPackage} from "./download-package";
 import {checkoutVersion} from "./checkoutVersion";
@@ -17,14 +15,13 @@ let each = function (object: any, fn: Function) {
 
 let PKG_CONFIG_FILENAME = 'package.json';
 let PKG_CONFIG_ENTRY = 'gitDependencies';
-let CACHE_DIR = Path.resolve(os.home(), '.git-install');
 let DEST_DIR = Path.resolve('' + pwd(), 'git-dependencies');
 
 if (!test('-d', DEST_DIR)) {
   mkdir(DEST_DIR);
 }
 
-export function gitInstall(config: any, indent: string = '') {
+export function gitInstall(config: any) {
   let packages: number = 0;
   let time = Date.now();
   each(config[PKG_CONFIG_ENTRY], function (_: string, host: string) {

@@ -1,5 +1,3 @@
-'use strict';
-
 import {clean, compare, satisfies} from "semver";
 import {exec, ExecOutputReturnValue} from "shelljs";
 import {ChildProcess} from "child_process";

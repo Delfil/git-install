@@ -1,7 +1,4 @@
-'use strict';
-
 import {exec, ExecOutputReturnValue, mkdir, rm, test} from "shelljs";
-import * as Path from "path";
 
 export function downloadPackage(host: string, domain: string, pkgName: string, dest: string): boolean {
   let repo = host + '/' + domain + '/' + pkgName;
