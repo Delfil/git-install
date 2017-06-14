@@ -5,6 +5,7 @@ import {clean} from "semver";
 import {cat, cd, mkdir, pwd, rm, test} from "shelljs";
 import {getTag} from "./get-tag";
 import {downloadPackage} from "./download-package";
+import {checkoutVersion} from "./checkoutVersion";
 
 let os = require('osenv');
 
@@ -19,56 +20,46 @@ let PKG_CONFIG_ENTRY = 'gitDependencies';
 let CACHE_DIR = Path.resolve(os.home(), '.git-install');
 let DEST_DIR = Path.resolve('' + pwd(), 'git-dependencies');
 
-if (!test('-d', CACHE_DIR)) {
-  mkdir(CACHE_DIR);
+if (!test('-d', DEST_DIR)) {
+  mkdir(DEST_DIR);
 }
-if (test('-d', DEST_DIR)) {
-  rm('-r', DEST_DIR);
-}
-mkdir(DEST_DIR);
 
 export function gitInstall(config: any, indent: string = '') {
+  let packages: number = 0;
+  let time = Date.now();
   each(config[PKG_CONFIG_ENTRY], function (_: string, host: string) {
-    each(config[PKG_CONFIG_ENTRY][host], function (versionRange: string, index: string) {
-      let tokens = index.split('/');
+    each(config[PKG_CONFIG_ENTRY][host], function (versionRange: string, fullPackageName: string) {
+      let tokens = fullPackageName.split('/');
       let domain = tokens[0];
       let pkgName = tokens[1];
-      let tag = getTag(host, domain, pkgName, versionRange);
-      let pkgLog = indent + domain + '/' + pkgName + '@' + versionRange + ': ';
+      let tag: string = getTag(host, domain, pkgName, versionRange);
+      let pkgLog = '[' + fullPackageName + '@' + tag + ']';
 
       if (!tag) {
-        console.error(pkgLog + 'err: no version found');
+        console.error('[' + fullPackageName + '@' + versionRange + ']' + ' does not match any versions');
         return;
       }
 
-      let version = clean(tag);
-      console.log(pkgLog + version);
-
-      let cacheDest = Path.resolve(CACHE_DIR, pkgName, version);
       let pkgDest = Path.resolve(DEST_DIR, pkgName);
-      let childConfigFile = Path.resolve(cacheDest, PKG_CONFIG_FILENAME);
-      let config = null;
 
-      cd(CACHE_DIR);
-
-      if (!test('-d', cacheDest)) {
-        if (!downloadPackage(host, domain, pkgName, tag, pkgDest)) {
-          console.error('err: downloading pkgName');
+      if (!test('-d', pkgDest)) {
+        console.info('Downloading ' + fullPackageName + '...');
+        if (!downloadPackage(host, domain, pkgName, pkgDest)) {
+          console.error('Error while downloading ' + fullPackageName);
           return;
         }
       }
 
-      // copyCachedPackage(pkgName, version, cacheDest, pkgDest);
-
-      if (test('-f', childConfigFile)) {
-        config = JSON.parse(cat(childConfigFile));
-        if (config) {
-          gitInstall(config, indent + '  ');
-        }
+      if (!checkoutVersion(tag, pkgDest, pkgLog)) {
+        console.warn('Failed to checkout tag ' + tag + ' of ' + fullPackageName);
+        return;
       }
+      packages++;
     });
   });
-};
+
+  console.info('Updated %s packages in %ss', packages, (Date.now() - time) / 1000);
+}
 
 let config = JSON.parse(cat(PKG_CONFIG_FILENAME));
 gitInstall(config);
